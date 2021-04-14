@@ -1,4 +1,4 @@
-package com.swiftoffice.azure_notificationhubs_flutter;
+package com.westrivemobile.azure_notificationhubs_flutter;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -70,8 +70,8 @@ public class NotificationService extends FirebaseMessagingService {
             NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(
                     ctx,
                     NOTIFICATION_CHANNEL_ID)
-                .setContentTitle(((Map) content.get("data")).get("title").toString())
-                .setContentText(((Map) content.get("data")).get("body").toString())
+                .setContentTitle(((Map) content.get("data")).get("senderUserId").toString()) //FIXME add proper Payloads
+                .setContentText(((Map) content.get("data")).get("message").toString())
                 .setDefaults(DEFAULT_SOUND | DEFAULT_VIBRATE | DEFAULT_ALL)
                 .setPriority(PRIORITY_HIGH)
                 .setSmallIcon(R.drawable.ic_menu_manage)

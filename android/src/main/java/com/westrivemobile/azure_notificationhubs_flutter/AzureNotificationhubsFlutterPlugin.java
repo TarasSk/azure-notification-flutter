@@ -1,7 +1,16 @@
-package com.swiftoffice.azure_notificationhubs_flutter;
+package com.westrivemobile.azure_notificationhubs_flutter;
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+
+import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -9,15 +18,6 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-
-import com.google.firebase.messaging.RemoteMessage;
-
-import java.util.Map;
 
 public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implements FlutterPlugin, MethodCallHandler {
 
@@ -49,7 +49,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     }
 
     private void onAttachedToEngine(Context context, BinaryMessenger binaryMessenger) {
-        this.applicationContext = context;
+        applicationContext = context;
         channel = new MethodChannel(binaryMessenger, "azure_notificationhubs_flutter");
         channel.setMethodCallHandler(this);
         IntentFilter intentFilter = new IntentFilter();
@@ -62,15 +62,21 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("configure")) {
-            registerWithNotificationHubs();
-            NotificationService.createChannelAndHandleNotifications(applicationContext);
+            String receiverId = call.argument("receiverId");
+            if (receiverId == null) {
+                result.error("-1","Receiver Id is missing", null);
+            } else {
+                registerWithNotificationHubs(receiverId);
+                NotificationService.createChannelAndHandleNotifications(applicationContext);
+            }
         } else {
             result.notImplemented();
         }
     }
 
-    public void registerWithNotificationHubs() {
+    public void registerWithNotificationHubs(String receiverId) {
         Intent intent = new Intent(applicationContext, RegistrationIntentService.class);
+        intent.putExtra("receiverId", receiverId);
         applicationContext.startService(intent);
     }
 
@@ -89,8 +95,6 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
             channel.invokeMethod("onMessage", content);
         }
     }
-
-
 
 
 }

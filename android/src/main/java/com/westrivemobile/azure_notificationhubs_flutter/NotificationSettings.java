@@ -1,4 +1,4 @@
-package com.swiftoffice.azure_notificationhubs_flutter;
+package com.westrivemobile.azure_notificationhubs_flutter;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
