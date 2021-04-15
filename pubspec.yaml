@@ -1,6 +1,6 @@
 name: azure_notificationhubs_flutter
 description: Flutter plugin for Azure Notification Hubs
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/rswiftoffice/azure-notificationhubs-flutter
 repository: https://github.com/rswiftoffice/azure-notificationhubs-flutter
 environment:
