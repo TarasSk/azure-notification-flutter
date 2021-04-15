@@ -27,8 +27,14 @@
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([@"configure" isEqualToString:call.method]) {
-    [self handleRegister];
-    if (_launchNotification != nil) {
+      NSString *receiverId = call.arguments[@"receiverId"];
+      if (receiverId == nil) {
+          result.error("-1","Receiver Id is missing", nil);
+      }
+      else {
+          [self handleRegister:receiverId];
+      }
+      if (_launchNotification != nil) {
       [_channel invokeMethod:@"onLaunch" arguments:_launchNotification];
     }
     result(nil);
@@ -56,6 +62,13 @@
 }
 
 - (void) application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    
+  NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
+  // getting an NSString
+  NSString *receiverId = [prefs stringForKey:@"receiverId"];
+    
+  NSLog(@"WS_!!!!!! NSUserDefaults receiverId: %@", receiverId);
+    
   NSString *token = [self stringWithDeviceToken:deviceToken];
   NSString *deviceTag = [@"device:" stringByAppendingString:token];
   NSArray *tags = @[deviceTag];
@@ -93,7 +106,7 @@
   return [[SBNotificationHub alloc] initWithConnectionString:connectionString notificationHubPath:hubName];
 }
 
-- (void)handleRegister {
+- (void)handleRegister:(NSString *)receiverId {
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
   UNAuthorizationOptions options =  UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
   [center requestAuthorizationWithOptions:(options) completionHandler:^(BOOL granted, NSError * _Nullable error) {
