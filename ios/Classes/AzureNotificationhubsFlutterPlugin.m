@@ -27,13 +27,7 @@
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
   if ([@"configure" isEqualToString:call.method]) {
-      NSString *receiverId = call.arguments[@"receiverId"];
-      if (receiverId == nil) {
-          result.error("-1","Receiver Id is missing", nil);
-      }
-      else {
-          [self handleRegister:receiverId];
-      }
+    [self handleRegister];
       if (_launchNotification != nil) {
       [_channel invokeMethod:@"onLaunch" arguments:_launchNotification];
     }
@@ -106,7 +100,7 @@
   return [[SBNotificationHub alloc] initWithConnectionString:connectionString notificationHubPath:hubName];
 }
 
-- (void)handleRegister:(NSString *)receiverId {
+- (void)handleRegister {
   UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
   UNAuthorizationOptions options =  UNAuthorizationOptionAlert | UNAuthorizationOptionSound | UNAuthorizationOptionBadge;
   [center requestAuthorizationWithOptions:(options) completionHandler:^(BOOL granted, NSError * _Nullable error) {
