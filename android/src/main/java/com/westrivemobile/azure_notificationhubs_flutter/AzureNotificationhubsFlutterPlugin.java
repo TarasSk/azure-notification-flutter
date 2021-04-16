@@ -62,8 +62,8 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("configure")) {
-            //String receiverId = call.argument("receiverId");
-            if (((receiverId = sharedPreferences.getString("flutter.receiverId", null)) == null)) {
+            String receiverId = sharedPreferences.getString("flutter.receiverId", null);
+            if (receiverId == null) {
                 result.error("-1","Receiver Id is missing", null);
             } else {
                 registerWithNotificationHubs(receiverId);
