@@ -58,20 +58,19 @@
 - (void) application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     
   NSUserDefaults *prefs = [NSUserDefaults standardUserDefaults];
-  // getting an NSString
-  NSString *receiverId = [prefs stringForKey:@"receiverId"];
+  NSString *receiverId = [prefs stringForKey:@"flutter.receiverId"];
     
-  NSLog(@"WS_!!!!!! NSUserDefaults receiverId: %@", receiverId);
+  NSLog(@"NSUserDefaults receiverId: %@", receiverId);
     
   NSString *token = [self stringWithDeviceToken:deviceToken];
-  NSString *deviceTag = [@"device:" stringByAppendingString:token];
-  NSArray *tags = @[deviceTag];
+  NSSet *tags = [NSSet setWithObjects:receiverId, nil];
+
   SBNotificationHub* hub = [self getNotificationHub];
   [hub registerNativeWithDeviceToken:deviceToken tags:tags completion:^(NSError* error) {
     if (error != nil) {
         NSLog(@"Error registering for notifications: %@", error);
     } else {
-      [self->_channel invokeMethod:@"onToken" arguments:deviceTag];
+      [self->_channel invokeMethod:@"onToken" arguments:receiverId];
     }
   }];
 }
