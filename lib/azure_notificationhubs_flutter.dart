@@ -15,9 +15,8 @@ class AzureNotificationhubsFlutter {
   MessageHandler _onResume;
   MessageHandler _onLaunch;
   TokenHandler _onToken;
-  final String reciverId;
 
-  AzureNotificationhubsFlutter({@required this.reciverId});
+  AzureNotificationhubsFlutter();
 
   /// Sets up [MessageHandler] for incoming messages.
   void configure({
@@ -31,7 +30,7 @@ class AzureNotificationhubsFlutter {
     _onResume = onResume;
     _onToken = onToken;
     _channel.setMethodCallHandler(_handleMethod);
-    _channel.invokeMethod<void>('configure', {'reciverId': reciverId});
+    _channel.invokeMethod<void>('configure');
   }
 
   Future<dynamic> _handleMethod(MethodCall call) async {
