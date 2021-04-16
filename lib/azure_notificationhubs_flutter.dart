@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 typedef Future<dynamic> MessageHandler(Map<String, dynamic> message);
@@ -15,6 +14,9 @@ class AzureNotificationhubsFlutter {
   MessageHandler _onResume;
   MessageHandler _onLaunch;
   TokenHandler _onToken;
+  String _reciverId;
+
+  set reciverId(String id) => _reciverId = id;
 
   AzureNotificationhubsFlutter();
 
@@ -30,7 +32,7 @@ class AzureNotificationhubsFlutter {
     _onResume = onResume;
     _onToken = onToken;
     _channel.setMethodCallHandler(_handleMethod);
-    _channel.invokeMethod<void>('configure');
+    _channel.invokeMethod<void>('configure',{'receiverId': _reciverId});
   }
 
   Future<dynamic> _handleMethod(MethodCall call) async {

@@ -4,8 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.preference.PreferenceManager;
 
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -64,7 +62,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
         if (call.method.equals("configure")) {
-            String receiverId = sharedPreferences.getString("flutter.receiverId", null);
+            String receiverId = call.argument("receiverId");
             if (receiverId == null) {
                 result.error("-1","Receiver Id is missing", null);
             } else {
