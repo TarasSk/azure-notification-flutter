@@ -1,5 +1,6 @@
 package com.westrivemobile.azure_notificationhubs_flutter;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -12,17 +13,23 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Map;
 
+import io.flutter.Log;
+import io.flutter.app.FlutterActivity;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry.NewIntentListener;
 
-public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implements FlutterPlugin, MethodCallHandler {
+public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implements FlutterPlugin, MethodCallHandler, NewIntentListener, ActivityAware {
 
     private static Context applicationContext;
     private MethodChannel channel;
+    private Activity activity;
 
     //    This static function is optional and equivalent to onAttachedToEngine. It supports the old
     //    pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
@@ -51,12 +58,33 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     private void onAttachedToEngine(Context context, BinaryMessenger binaryMessenger) {
         applicationContext = context;
         channel = new MethodChannel(binaryMessenger, "azure_notificationhubs_flutter");
-        channel.setMethodCallHandler(this);
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(NotificationService.ACTION_TOKEN);
         intentFilter.addAction(NotificationService.ACTION_REMOTE_MESSAGE);
         LocalBroadcastManager manager = LocalBroadcastManager.getInstance(applicationContext);
         manager.registerReceiver(this, intentFilter);
+    }
+
+    @Override
+    public void onAttachedToActivity(@NonNull ActivityPluginBinding binding) {
+        this.activity = binding.getActivity();
+        channel.setMethodCallHandler(this);
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(@NonNull ActivityPluginBinding binding) {
+
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+        Log.d("DART/NATIVE", "onDetachedFromEngine");
+        this.channel.setMethodCallHandler(null);
     }
 
     @Override
@@ -96,5 +124,16 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
         }
     }
 
+    @Override
+    public boolean onNewIntent(Intent intent) {
+        Log.d("DART/NATIVE", "onNewIntent");
+        RemoteMessage message = intent.getParcelableExtra(NotificationService.EXTRA_REMOTE_MESSAGE);
+        Map<String, Object> content = NotificationService.parseRemoteMessage(message);
+        channel.invokeMethod("onResume", content);
+        if (this.activity != null) {
+            this.activity.setIntent(intent);
+        }
+        return true;
+    }
 
 }
