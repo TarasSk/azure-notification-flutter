@@ -34,6 +34,9 @@ class AzureNotificationhubsFlutter {
     _channel.setMethodCallHandler(_handleMethod);
     _channel.invokeMethod<void>('configure',{'receiverId': _reciverId});
   }
+  void unregister(){
+    _channel.invokeMethod<void>('unregister');
+  }
 
   Future<dynamic> _handleMethod(MethodCall call) async {
     switch (call.method) {

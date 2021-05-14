@@ -32,6 +32,9 @@
       [_channel invokeMethod:@"onLaunch" arguments:_launchNotification];
     }
     result(nil);
+  } if ([@"unregister" isEqualToString:call.method]) {
+    [self handleUnregister];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
   }

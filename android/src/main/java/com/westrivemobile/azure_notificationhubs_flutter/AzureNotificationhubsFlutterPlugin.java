@@ -7,6 +7,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.ProcessLifecycleOwner;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.google.firebase.messaging.RemoteMessage;
@@ -30,6 +32,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
     private static Context applicationContext;
     private MethodChannel channel;
     private Activity activity;
+    public static NotificationLifeCycle appLifeCycle = NotificationLifeCycle.AppKilled;
 
     //    This static function is optional and equivalent to onAttachedToEngine. It supports the old
     //    pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
@@ -110,6 +113,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
 
     @Override
     public void onReceive(Context context, Intent intent) {
+        getApplicationLifeCycle();
         String action = intent.getAction();
         if (action == null) {
             return;
@@ -120,6 +124,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
         } else if (action.equals(NotificationService.ACTION_REMOTE_MESSAGE)) {
             RemoteMessage message = intent.getParcelableExtra(NotificationService.EXTRA_REMOTE_MESSAGE);
             Map<String, Object> content = NotificationService.parseRemoteMessage(message);
+            Log.d("DART/NATIVE", "appLifeCycle" + appLifeCycle.toString());
             channel.invokeMethod("onMessage", content);
         }
     }
@@ -129,6 +134,7 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
         Log.d("DART/NATIVE", "onNewIntent");
         RemoteMessage message = intent.getParcelableExtra(NotificationService.EXTRA_REMOTE_MESSAGE);
         Map<String, Object> content = NotificationService.parseRemoteMessage(message);
+
         channel.invokeMethod("onResume", content);
         if (this.activity != null) {
             this.activity.setIntent(intent);
@@ -136,4 +142,26 @@ public class AzureNotificationhubsFlutterPlugin extends BroadcastReceiver implem
         return true;
     }
 
+    public static NotificationLifeCycle getApplicationLifeCycle(){
+
+        Lifecycle.State state = ProcessLifecycleOwner.get().getLifecycle().getCurrentState();
+        //Log.d(TAG, "ProcessLifecycleOwner: " + state.toString());
+
+        if(state == Lifecycle.State.RESUMED){
+            appLifeCycle = NotificationLifeCycle.Foreground;
+        } else
+        if(state == Lifecycle.State.CREATED){
+            appLifeCycle = NotificationLifeCycle.Background;
+        } else {
+            appLifeCycle = NotificationLifeCycle.AppKilled;
+        }
+        return appLifeCycle;
+    }
+
+}
+
+enum NotificationLifeCycle {
+    Foreground,
+    Background,
+    AppKilled
 }
